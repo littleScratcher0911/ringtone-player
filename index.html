@@ -3,43 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Klingelton-Player</title>
+  <title>Klingelton-Player 🎵</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
       padding: 20px;
-      background: #f9f9f9;
-      color: #333;
+      background: #f4f4f4;
+      color: #222;
     }
     h1 {
-      color: #444;
+      color: #333;
     }
     input[type="file"] {
       margin-bottom: 20px;
     }
     .audio-item {
-      margin-bottom: 10px;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .progress {
+      flex: 1;
+    }
+    button {
+      padding: 5px 10px;
+      border: none;
+      background-color: #007BFF;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
     }
     audio {
-      width: 100%;
-      outline: none;
+      display: none;
     }
   </style>
 </head>
 <body>
 
-  <h1>Klingelton-Player</h1>
-  <p>Wähle eine oder mehrere Audiodateien aus, um sie abzuspielen:</p>
-  <input type="file" id="fileInput" accept="audio/*" multiple>
+  <h1>🎶 Klingelton-Player</h1>
+
+  <p>Wähle deine Audiodateien aus (nur <strong>.mp3, .m4a, .wav</strong>):</p>
+  <input type="file" id="fileInput" accept=".mp3,.m4a,.wav" multiple>
 
   <div id="playlist"></div>
 
   <script>
     const fileInput = document.getElementById('fileInput');
     const playlist = document.getElementById('playlist');
+    const allowedTypes = ['audio/mpeg', 'audio/mp4', 'audio/wav'];
 
     fileInput.addEventListener('change', function () {
-      playlist.innerHTML = ''; // Leeren, wenn neue Auswahl
+      playlist.innerHTML = '';
       const files = this.files;
 
       if (files.length === 0) {
@@ -48,22 +74,73 @@
       }
 
       Array.from(files).forEach(file => {
-        const url = URL.createObjectURL(file);
-        const container = document.createElement('div');
-        container.className = 'audio-item';
-
-        const label = document.createElement('p');
-        label.textContent = file.name;
-
-        const audio = document.createElement('audio');
-        audio.controls = true;
-        audio.src = url;
-
-        container.appendChild(label);
-        container.appendChild(audio);
-        playlist.appendChild(container);
+        if (!allowedTypes.includes(file.type)) {
+          alert(`❌ Datei nicht unterstützt: ${file.name}`);
+          return;
+        }
+        createPlayerForFile(file);
       });
     });
+
+    function createPlayerForFile(file) {
+      const url = URL.createObjectURL(file);
+      const container = document.createElement('div');
+      container.className = 'audio-item';
+
+      const title = document.createElement('p');
+      title.textContent = file.name;
+
+      const audio = document.createElement('audio');
+      audio.src = url;
+
+      const playBtn = document.createElement('button');
+      playBtn.textContent = '▶️';
+      let isPlaying = false;
+
+      playBtn.addEventListener('click', () => {
+        if (isPlaying) {
+          audio.pause();
+        } else {
+          audio.play();
+        }
+      });
+
+      audio.addEventListener('play', () => {
+        isPlaying = true;
+        playBtn.textContent = '⏸️';
+      });
+
+      audio.addEventListener('pause', () => {
+        isPlaying = false;
+        playBtn.textContent = '▶️';
+      });
+
+      const progress = document.createElement('input');
+      progress.type = 'range';
+      progress.min = 0;
+      progress.value = 0;
+      progress.step = 0.01;
+      progress.className = 'progress';
+
+      audio.addEventListener('timeupdate', () => {
+        progress.value = audio.currentTime;
+        progress.max = audio.duration;
+      });
+
+      progress.addEventListener('input', () => {
+        audio.currentTime = progress.value;
+      });
+
+      const controls = document.createElement('div');
+      controls.className = 'controls';
+      controls.appendChild(playBtn);
+      controls.appendChild(progress);
+
+      container.appendChild(title);
+      container.appendChild(controls);
+      container.appendChild(audio);
+      playlist.appendChild(container);
+    }
   </script>
 
 </body>
