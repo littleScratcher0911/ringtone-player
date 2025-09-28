@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Klingelton-Player</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
+      color: #333;
+    }
+    h1 {
+      color: #444;
+    }
+    input[type="file"] {
+      margin-bottom: 20px;
+    }
+    .audio-item {
+      margin-bottom: 10px;
+    }
+    audio {
+      width: 100%;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Klingelton-Player</h1>
+  <p>Wähle eine oder mehrere Audiodateien aus, um sie abzuspielen:</p>
+  <input type="file" id="fileInput" accept="audio/*" multiple>
+
+  <div id="playlist"></div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const playlist = document.getElementById('playlist');
+
+    fileInput.addEventListener('change', function () {
+      playlist.innerHTML = ''; // Leeren, wenn neue Auswahl
+      const files = this.files;
+
+      if (files.length === 0) {
+        playlist.innerHTML = '<p>Keine Dateien ausgewählt.</p>';
+        return;
+      }
+
+      Array.from(files).forEach(file => {
+        const url = URL.createObjectURL(file);
+        const container = document.createElement('div');
+        container.className = 'audio-item';
+
+        const label = document.createElement('p');
+        label.textContent = file.name;
+
+        const audio = document.createElement('audio');
+        audio.controls = true;
+        audio.src = url;
+
+        container.appendChild(label);
+        container.appendChild(audio);
+        playlist.appendChild(container);
+      });
+    });
+  </script>
+
+</body>
+</html>
